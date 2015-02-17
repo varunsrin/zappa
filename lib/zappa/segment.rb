@@ -1,4 +1,6 @@
 require 'tempfile'
+require 'open3'
+require 'pry'
 
 module Zappa
   class Segment
@@ -16,11 +18,12 @@ module Zappa
       @source = Wave.new(safe_copy(path))
     end
 
-    def to_file(path, format = 'wav')
+    def to_file(path)
       raise FileError.new('No data in Segment') if @source.nil?
-      out = system('ffmpeg', '-i', @source.file_path, '-y', '-f', format, path)
-      raise ('Cannot export to' + path ) if out == false
-      raise FileError.new('ffmpeg not installed') if out.nil?
+      cmd = 'ffmpeg -i ' + @source.file_path + ' -y -f wav ' + path
+      Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+        raise ('Cannot export to' + path ) unless wait_thr.value.success?
+      end
     end
 
     def ==(other)
@@ -31,9 +34,10 @@ module Zappa
 
     def safe_copy(path)
       tmp = Tempfile.new('zappa')
-      out = system('ffmpeg', '-i', path, '-vn', '-y', '-f', 'wav', tmp.path)
-      raise 'Cannot open file' if out == false
-      raise 'ffmpeg not installed' if out.nil?
+      cmd = 'ffmpeg -i ' + path + ' -vn -y -f wav ' + tmp.path
+      Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+        raise ('Cannot open file ' + path ) unless wait_thr.value.success?
+      end
       tmp.path
     end
   end

@@ -25,7 +25,7 @@ describe Zappa::Segment do
   describe '#to_file' do
     it 'exports the segment to a wav file' do
       tmp = Tempfile.new('zappa-spec')
-      subject.to_file(tmp.path, 'wav')
+      subject.to_file(tmp.path)
       expect(Zappa::Wave.new(WAV_IN)).to eq(Zappa::Wave.new(tmp.path))
     end
 
