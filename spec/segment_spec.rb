@@ -3,33 +3,41 @@ require 'tempfile'
 
 WAV_IN  = 'spec/audio/basic-5s.wav'
 
-describe Zappa::Segment, '#from_file' do
-  it 'reads wav file data into the segment' do
+describe Zappa::Segment do
+  before do
     subject.from_file(WAV_IN)
-    expect(wav_data(subject.data)).to eq(wav_data(IO.binread(WAV_IN)))
   end
 
-  it 'raises error if file does not exist' do
-    expect{ subject.from_file('some_foo') }.to raise_error(RuntimeError)
+  describe '#from_file' do
+    it 'makes a safe copy of the source wav file' do
+      expect(Zappa::Wave.new(WAV_IN))
+        .to eq(Zappa::Wave.new(subject.source.file_path))
+    end
+
+    it 'raises error if file does not exist' do
+      expect { Zappa::Segment.new('some_foo') }.to raise_error(RuntimeError)
+    end
+
+    pending 'raises error if ffmpeg is not installed'
+    pending 'only permits wav files'
   end
 
-  pending 'does not destroy metadata'
+  describe '#to_file' do
+    it 'exports the segment to a wav file' do
+      tmp = Tempfile.new('zappa-spec')
+      subject.to_file(tmp.path, 'wav')
+      expect(Zappa::Wave.new(WAV_IN)).to eq(Zappa::Wave.new(tmp.path))
+    end
+
+    it 'raises error if segment is empty' do
+      w = Zappa::Segment.new
+      expect { w.to_file('foo.wav') }.to raise_error(Zappa::FileError)
+    end
+
+    it 'raises error for invalid path' do
+      expect { subject.to_file('some:foo') }.to raise_error(RuntimeError)
+    end
+
+    pending 'raises error if ffmpeg is not installed'
+  end
 end
-
-describe Zappa::Segment, '#to_file' do
-  it 'exports the segment to a wav file' do
-    subject.from_file(WAV_IN)
-    output = Tempfile.new('zappa-spec').path
-    subject.to_file(output)
-    expect(IO.binread(subject.safe_wav_path)).to eq(IO.binread(output))
-  end
-
-  it 'creates an empty wave container if segment is empty' do
-  end
-
-  it 'raises error for invalid path' do
-    subject.from_file(WAV_IN)
-    expect{ subject.to_file('some:foo') }.to raise_error(RuntimeError)
-  end
-end
-
