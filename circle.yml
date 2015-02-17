@@ -1,0 +1,3 @@
+dependencies:
+  pre:
+  - sudo apt-get install ffmpeg
