@@ -1,8 +1,12 @@
 # Zappa
 
-TODO: Write a gem description
+Zappa is a high level audio manipulation library for Ruby, inspired by pydub.
 
 ## Installation
+
+First install ffmpeg:
+
+    brew install ffmpeg
 
 Add this line to your application's Gemfile:
 
