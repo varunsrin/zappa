@@ -1,5 +1,4 @@
-require "zappa/version"
-
-module Zappa
-  # Your code goes here...
-end
+require 'zappa/version'
+require 'zappa/segment'
+require 'zappa/wave'
+require 'zappa/errors'
