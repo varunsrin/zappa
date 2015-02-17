@@ -16,6 +16,13 @@ describe Zappa::Wave do
     expect(w.format).to eq(fmt_header)
   end
 
+  it 'updates file without altering it' do
+    orig = Zappa::Wave.new(WAV_IN)
+    orig.update
+    current = Zappa::Wave.new(WAV_IN)
+    expect(orig).to eq(current)
+  end
+
   it 'raises error for incorrect path' do
     expect { Zappa::Wave.new(WAV_EX) }.to raise_error(Zappa::FileError)
   end

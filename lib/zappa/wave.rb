@@ -7,6 +7,7 @@ module Zappa
     KNOWN_FMT_SIZE = 16
 
     def initialize(path)
+      @header = {}
       @format = {}
       @data = {}
 
@@ -20,6 +21,35 @@ module Zappa
       end
     end
 
+    def update
+      raw_file = pack_riff_header + pack_fmt + pack_data
+      File.write(@file_path, raw_file)
+    end
+
+    def pack_riff_header
+      hdr = ''
+      hdr += @header[:chunk_id]
+      hdr += [@header[:chunk_size]].pack('V')
+      hdr += @header[:format]
+    end
+
+    def pack_fmt
+      fmt = 'fmt '
+      fmt += [16].pack('V')
+      fmt += [@format[:audio_format]].pack('v')
+      fmt += [@format[:channels]].pack('v')
+      fmt += [@format[:sample_rate]].pack('V')
+      fmt += [@format[:byte_rate]].pack('V')
+      fmt += [@format[:block_align]].pack('v')
+      fmt += [@format[:bits_per_sample]].pack('v')
+    end
+
+    def pack_data
+      data = 'data'
+      data += [@data[:size]].pack('V')
+      data += @data[:data]
+    end
+
     def unpack_wav
       unpack_riff_header
       while @data[:data].nil?
@@ -28,11 +58,11 @@ module Zappa
     end
 
     def unpack_riff_header
-      chunk_id = @file.read(4)
-      _ = @file.read(4).unpack('V').first # chunk_size
-      format = @file.read(4)
-      raise FileFormatError.new('Format is not WAVE') unless format == 'WAVE'
-      raise FileFormatError.new('ID is not RIFF') unless chunk_id == 'RIFF'
+      @header[:chunk_id] = @file.read(4)
+      @header[:chunk_size] = @file.read(4).unpack('V').first
+      @header[:format] = @file.read(4)
+      raise FileFormatError.new('Format is not WAVE') unless @header[:format] == 'WAVE'
+      raise FileFormatError.new('ID is not RIFF') unless @header[:chunk_id] == 'RIFF'
     end
 
     def unpack_subchunk
