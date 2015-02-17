@@ -3,7 +3,7 @@
 module Zappa
   class Wave
     attr_accessor :format, :data, :data_size, :file_path
-    SUBCHUNKS = %w('fmt', 'data')
+    SUBCHUNKS = %q('fmt', 'data')
     KNOWN_FMT_SIZE = 16
 
     def initialize(path)
@@ -58,7 +58,7 @@ module Zappa
 
     def unpack_data
       @data[:size]  = @file.read(4).unpack('V').first
-      @data[:data]  = @file.read(@data_size)
+      @data[:data]  = @file.read(@data[:size])
     end
 
     def unpack_unknown
