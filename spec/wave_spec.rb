@@ -6,19 +6,22 @@ WAV_EX  = 'does-not-exist.wav'
 
 describe Zappa::Wave do
   it 'reads format headers correctly' do
+    w = Zappa::Wave.new(WAV_IN)
+
     fmt_header = { audio_format: 1,
                    channels: 2,
                    sample_rate: 44_100,
                    byte_rate: 176_400,
                    block_align: 4,
                    bits_per_sample: 16 }
-    w = Zappa::Wave.new(WAV_IN)
-    expect(w.format).to eq(fmt_header)
+    fmt_header.each do |h|  
+      expect(h[1]).to eq(w.format.send(h[0]))
+    end
   end
 
-  it 'updates file without altering it' do
+  it 'opens and saves file without modifying it' do
     orig = Zappa::Wave.new(WAV_IN)
-    orig.update
+    orig.save
     current = Zappa::Wave.new(WAV_IN)
     expect(orig).to eq(current)
   end
