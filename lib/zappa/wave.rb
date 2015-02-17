@@ -97,7 +97,7 @@ module Zappa
     end
 
     def ==(other)
-      other.format == format && other.data == data
+      other.data == data
     end
   end
 end
