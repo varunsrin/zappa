@@ -31,7 +31,7 @@ describe Zappa::Segment do
 
     it 'raises error if segment is empty' do
       w = Zappa::Segment.new
-      expect { w.to_file('foo.wav') }.to raise_error(Zappa::FileError)
+      expect { w.to_file('foo.wav') }.to raise_error(RuntimeError)
     end
 
     it 'raises error for invalid path' do

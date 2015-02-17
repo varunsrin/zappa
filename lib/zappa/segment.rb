@@ -19,10 +19,10 @@ module Zappa
     end
 
     def to_file(path)
-      raise FileError.new('No data in Segment') if @source.nil?
+      fail 'No data in Segment' if @source.nil?
       cmd = 'ffmpeg -i ' + @source.file_path + ' -y -f wav ' + path
-      Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-        raise ('Cannot export to' + path ) unless wait_thr.value.success?
+      Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
+        fail 'Cannot export to' + path unless wait_thr.value.success?
       end
     end
 
@@ -35,8 +35,8 @@ module Zappa
     def safe_copy(path)
       tmp = Tempfile.new('zappa')
       cmd = 'ffmpeg -i ' + path + ' -vn -y -f wav ' + tmp.path
-      Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-        raise ('Cannot open file ' + path ) unless wait_thr.value.success?
+      Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
+        fail 'Cannot open file ' + path unless wait_thr.value.success?
       end
       tmp.path
     end
