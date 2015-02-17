@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Zappa::VERSION
   spec.authors       = ['Varun Srinivasan']
   spec.email         = ['varunsrin@gmail.com']
-  spec.summary       = %q{TODO: Ruby gem for manipulating audio files.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = 'Ruby gem for manipulating audio files.'
+  spec.description   = 'TODO: Write a longer description. Optional.'
   spec.homepage      = ''
   spec.license       = 'MIT'
 
