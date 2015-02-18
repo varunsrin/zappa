@@ -13,7 +13,7 @@ module Zappa
 
     def pack
       fmt = @chunk_id
-      fmt += [FMT_SIZE].pack('V')
+      fmt += [@chunk_size].pack('V')
       fmt += [@audio_format].pack('v')
       fmt += [@channels].pack('v')
       fmt += [@sample_rate].pack('V')
@@ -29,7 +29,8 @@ module Zappa
       @byte_rate       = data.byteslice(8,12).unpack('V').first
       @block_align     = data.byteslice(12,14).unpack('v').first
       @bits_per_sample = data.byteslice(14,16).unpack('v').first
-      @unknown = @file.read(@chunk_size - FMT_SIZE) if @chunk_size - FMT_SIZE > 0
+      unknown_size     = @chunk_size - FMT_SIZE
+      @unknown      = data.byteslice(16, 16 + unknown_size) if unknown_size > 0
     end
   end
 end
