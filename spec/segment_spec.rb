@@ -4,38 +4,85 @@ require 'tempfile'
 WAV_IN  = 'spec/audio/basic-5s.wav'
 
 describe Zappa::Segment do
-  before do
-    subject.from_file(WAV_IN)
+
+  describe '#initialize' do
+    it 'does not have a cache value' do
+      expect(subject.cache.nil?).to eq(true)
+    end
   end
 
   describe '#from_file' do
-    it 'makes a safe copy of the source wav file' do
-      expect(Zappa::Wave.new(WAV_IN))
-        .to eq(Zappa::Wave.new(subject.source.file_path))
+    before do
+      subject.from_file(WAV_IN)
+    end
+
+    it 'makes a safe wav copy of the file' do
+      orig_file = File.open(WAV_IN, 'rb')
+      orig_wav = Zappa::Wave.new
+      orig_wav.unpack(orig_file)
+      cached_file = File.open(subject.cache.path, 'rb')
+      cached_wav = Zappa::Wave.new
+      cached_wav.unpack(cached_file)
+      expect(orig_wav).to eq(cached_wav)
+    end
+
+    it 'has a path value' do
+      expect(subject.cache.nil?).to eq(false)
     end
 
     it 'raises error if file does not exist' do
-      expect { Zappa::Segment.new('some_foo') }.to raise_error(RuntimeError)
+      s = Zappa::Segment.new
+      expect { s.from_file('some_foo') }.to raise_error(RuntimeError)
     end
 
     pending 'raises error if ffmpeg is not installed'
-    pending 'only permits wav files'
   end
 
-  describe '#to_file' do
-    it 'exports the segment to a wav file' do
-      tmp = Tempfile.new('zappa-spec')
-      subject.to_file(tmp.path)
-      expect(Zappa::Wave.new(WAV_IN)).to eq(Zappa::Wave.new(tmp.path))
+  describe '#persist' do
+    before do
+      subject.from_file(WAV_IN)
+      subject.cache = nil
     end
 
-    it 'raises error if segment is empty' do
-      w = Zappa::Segment.new
-      expect { w.to_file('foo.wav') }.to raise_error(RuntimeError)
+    it 'creates new cache, if none exists' do
+      subject.persist
+      expect(subject.cache.nil?).to eq(false)
+      w = Zappa::Wave.new
+      w.unpack(subject.cache)
+      expect(subject.wav).to eq(w)
+    end
+
+    it 'overwrites cache, if it exists' do
+      subject.wav.format.sample_rate = 44101
+      subject.persist
+      w = Zappa::Wave.new
+      w.unpack(subject.cache.path)
+      expect(w.format.sample_rate).to eq(44101)
+    end
+  end
+
+  describe '#export' do
+    before do
+      @tmp = Tempfile.new('zappa-spec')
+      subject.from_file(WAV_IN)
+      subject.cache = nil
+      subject.export(@tmp.path)
+    end
+
+    it 'persisted the file' do
+      expect(subject.cache.nil?).to eq(false)
+    end
+
+    it 'exports the segment correctly' do
+      orig_wav = Zappa::Wave.new
+      orig_wav.unpack(File.open(WAV_IN, 'rb')) 
+      export_wav = Zappa::Wave.new
+      export_wav.unpack(File.open(@tmp.path, 'rb'))
+      expect(orig_wav).to eq(export_wav)
     end
 
     it 'raises error for invalid path' do
-      expect { subject.to_file('some:foo') }.to raise_error(RuntimeError)
+      expect { subject.export('some:foo') }.to raise_error(RuntimeError)
     end
 
     pending 'raises error if ffmpeg is not installed'

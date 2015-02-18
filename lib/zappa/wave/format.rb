@@ -5,10 +5,21 @@ module Zappa
 
     FMT_SIZE = 16
 
-    def initialize(file)
-      @chunk_id = file.read(4)
-      @chunk_size = file.read(4).unpack('V').first
-      unpack(file.read(@chunk_size))
+    def initialize(file = nil)
+      if file.nil?
+        @chunk_id        = 'fmt '
+        @chunk_size      = FMT_SIZE
+        @audio_format    = 1
+        @channels        = 2
+        @sample_rate     = 44100
+        @byte_rate       = 176_400
+        @block_align     = 4
+        @bits_per_sample = 16
+      else
+        @chunk_id = file.read(4)
+        @chunk_size = file.read(4).unpack('V').first
+        unpack(file.read(@chunk_size))
+      end
     end
 
     def pack

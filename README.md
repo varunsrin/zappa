@@ -38,7 +38,7 @@ puts s.format
 and save it to a different location:
 
 ```
-s.to_file('output.wav')
+s.export('output.wav')
 ```
 
 

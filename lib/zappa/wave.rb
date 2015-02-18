@@ -5,54 +5,62 @@ require 'zappa/wave/sub_chunk'
 # http://soundfile.sapp.org/doc/WaveFormat/
 module Zappa
   class Wave
-    attr_accessor :header, :format, :data, :opt_chunks, :file_path
+    attr_reader :header, :format, :opt_chunks
 
-    def initialize(path = nil)
+    def initialize
+      @header = RiffHeader.new
+      @format = Format.new
+      @wave_data = SubChunk.new
       @opt_chunks = []
-      @data = nil
-      @file_path = path
-      from_file(@file_path) unless @file_path.nil?
     end
 
-    def save
-      File.write(@file_path, pack)
+    def data
+      @wave_data.data
     end
 
-    def from_file(path)
-      begin
-        @file = File.new(path, 'rb')
-      rescue
-        raise FileError, 'Could not find ' + path
-      else
-        unpack
-      end
+    def data_size
+      @wave_data.chunk_size
+    end
+
+    def update_data(d)
+      curr_size = @wave_data.data.bytesize
+      new_size = d.bytesize
+      @header.chunk_size += (new_size - curr_size) 
+      @wave_data.chunk_size = new_size
+      @wave_data.data = d
     end
 
     def ==(other)
-      other.data.data == data.data
+      other.data == data
     end
-
-    private
 
     def pack
       enc_file = @header.pack + @format.pack
       @opt_chunks.each do |c|
         enc_file += c.pack
       end
-      enc_file + @data.pack
+      enc_file + @wave_data.pack
     end
 
-    def unpack
-      @header = RiffHeader.new(@file)
-      @format = Format.new(@file)
-      while @data.nil?
-        s = SubChunk.new(@file)
+    def unpack(file)
+      file = find_unpack_file(file)
+      data_found = false
+      @header = RiffHeader.new(file)
+      @format = Format.new(file)
+      while !data_found
+        s = SubChunk.new(file)
         if s.chunk_id == 'data'
-          @data = s
+          @wave_data = s
+          data_found = true
         else
           @opt_chunks << s
         end
       end
+    end
+
+    def find_unpack_file(file)
+      return File.open(file, 'rb') if file.class == String
+      file
     end
   end
 end

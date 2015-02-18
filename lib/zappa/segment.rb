@@ -4,30 +4,44 @@ require 'pry'
 
 module Zappa
   class Segment
-    attr_reader :source
+    attr_accessor :wav, :cache
 
-    def initialize(path = nil)
-      if path
-        from_file(path)
-      else
-        @source = nil
-      end
+    def initialize
+      @wav = Wave.new
+      @cache = nil
     end
 
     def from_file(path)
-      @source = Wave.new(safe_copy(path))
+      @cache = safe_copy(path) 
+      @wav.unpack(@cache)
     end
 
-    def to_file(path)
-      fail 'No data in Segment' if @source.nil?
-      cmd = 'ffmpeg -i ' + @source.file_path + ' -y -f wav ' + path
+    def from_wav(wav)
+      @wav = wav
+      persist
+    end
+
+    def export(path)
+      persist
+      cmd = 'ffmpeg -i ' + @cache.path + ' -y -f wav ' + path
       Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
         fail 'Cannot export to' + path unless wait_thr.value.success?
       end
     end
 
-    def ==(other)
-      source == other.source
+    def spawn(data)
+      binding.pry
+      new_wav = deep_copy(@wav)
+      new_wav.update_data(data)
+      seg = Segment.new
+      s.wav = new_wav
+      seg
+    end
+
+    def persist
+      fail 'No data to persist' if @wav.nil?
+      @cache = Tempfile.new('zappa') if @cache.nil?
+      File.write(@cache.path, @wav.pack)
     end
 
     private
@@ -38,7 +52,7 @@ module Zappa
       Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
         fail 'Cannot open file ' + path unless wait_thr.value.success?
       end
-      tmp.path
+      tmp
     end
   end
 end
