@@ -23,7 +23,7 @@ module Zappa
 
     def export(path)
       persist
-      cmd = 'ffmpeg -i ' + @cache.path + ' -y -f wav ' + path
+      cmd = 'ffmpeg -i ' + @cache + ' -y -f wav ' + path
       Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
         fail 'Cannot export to' + path unless wait_thr.value.success?
       end
@@ -39,9 +39,11 @@ module Zappa
     end
 
     def persist
-      fail 'No data to persist' if @wav.nil?
-      @cache = Tempfile.new('zappa') if @cache.nil?
-      File.write(@cache.path, @wav.pack)
+      if @cache.nil?
+        tmp = Tempfile.new('zappa')
+        @cache = tmp.path 
+      end
+      File.write(@cache, @wav.pack)
     end
 
     private
@@ -52,7 +54,7 @@ module Zappa
       Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
         fail 'Cannot open file ' + path unless wait_thr.value.success?
       end
-      tmp
+      tmp.path
     end
   end
 end

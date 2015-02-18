@@ -4,7 +4,6 @@ require 'tempfile'
 WAV_IN  = 'spec/audio/basic-5s.wav'
 
 describe Zappa::Segment do
-
   describe '#initialize' do
     it 'does not have a cache value' do
       expect(subject.cache.nil?).to eq(true)
@@ -20,9 +19,8 @@ describe Zappa::Segment do
       orig_file = File.open(WAV_IN, 'rb')
       orig_wav = Zappa::Wave.new
       orig_wav.unpack(orig_file)
-      cached_file = File.open(subject.cache.path, 'rb')
       cached_wav = Zappa::Wave.new
-      cached_wav.unpack(cached_file)
+      cached_wav.unpack(subject.cache)
       expect(orig_wav).to eq(cached_wav)
     end
 
@@ -56,7 +54,7 @@ describe Zappa::Segment do
       subject.wav.format.sample_rate = 44101
       subject.persist
       w = Zappa::Wave.new
-      w.unpack(subject.cache.path)
+      w.unpack(subject.cache)
       expect(w.format.sample_rate).to eq(44101)
     end
   end

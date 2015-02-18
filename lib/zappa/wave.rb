@@ -42,8 +42,8 @@ module Zappa
       enc_file + @wave_data.pack
     end
 
-    def unpack(file)
-      file = find_unpack_file(file)
+    def unpack(path)
+      file = File.open(parse_file(path), 'rb')
       data_found = false
       @header = RiffHeader.new(file)
       @format = Format.new(file)
@@ -58,9 +58,10 @@ module Zappa
       end
     end
 
-    def find_unpack_file(file)
-      return File.open(file, 'rb') if file.class == String
-      file
+    def parse_file(file)
+      return file if file.class == String
+      return file.path if file.class == File
+      fail 'cannot unpack type: ' + file.class.to_s
     end
   end
 end

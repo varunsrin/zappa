@@ -90,16 +90,13 @@ describe Zappa::Wave do
     pending 'is equal to a wave with different opt chunks'
   end
 
-  describe '#find_unpack_file' do
+  describe '#parse_file' do
     it 'returns the object, if it is a file' do
-      expect(subject.find_unpack_file(@file))
-        .to eq(@file)
+      expect(subject.parse_file(@file)).to eq(@file.path)
     end
 
     it 'returns the File at path (string), if it is a string' do
-      file = subject.find_unpack_file(WAV_IN)
-      expect(file.class).to eq(File)
-      expect(file.path).to eq(WAV_IN)
+      expect(subject.parse_file(WAV_IN)).to eq(WAV_IN)
     end
   end
 end
