@@ -4,11 +4,11 @@ require 'tempfile'
 WAV_IN  = 'spec/audio/basic-5s.wav'
 WAV_EX  = 'does-not-exist.wav'
 
-DEFAULT_HEADER = { chunk_id: 'RIFF',
+WAV_EMPTY_HDR = { chunk_id: 'RIFF',
                    chunk_size: 40,
                    format: 'WAVE' }
 
-WAV_IN_FMT = { audio_format: 1,
+WAV_DEF_FMT = { audio_format: 1,
                   channels: 2,
                   sample_rate: 44_100,
                   byte_rate: 176_400,
@@ -24,11 +24,12 @@ describe Zappa::Wave do
     @wav.unpack(@file)
   end
 
+
   describe '#initialize' do
     it 'has a default wave header' do
       w = Zappa::Wave.new
-      DEFAULT_HEADER.each { |h| expect(h[1]).to eq(w.header.send(h[0])) }
-      WAV_IN_FMT.each { |h| expect(h[1]).to eq(w.format.send(h[0])) }
+      WAV_EMPTY_HDR.each { |h| expect(h[1]).to eq(w.header.send(h[0])) }
+      WAV_DEF_FMT.each { |h| expect(h[1]).to eq(w.format.send(h[0])) }
       expect(w.data).to eq(nil)
       expect(w.data_size).to eq(0)
     end
@@ -36,9 +37,10 @@ describe Zappa::Wave do
     pending 'has an empty fmt and data header'
   end
 
+
   describe '#unpack' do
     it 'reads format headers correctly' do
-      WAV_IN_FMT.each do |h|  
+      WAV_DEF_FMT.each do |h|  
         expect(h[1]).to eq(@wav.format.send(h[0]))
       end
     end
@@ -46,9 +48,11 @@ describe Zappa::Wave do
     it 'reads data size correctly' do
       expect(@wav.data_size).to eq(WAV_IN_DATA_SIZE)
     end
-
+    
+    pending 'verify the data somehow'
     pending 'preserves optional subchunks'
   end
+
 
   describe '#pack' do
     it 'packs itself into a data string' do
@@ -56,8 +60,10 @@ describe Zappa::Wave do
         .to eq(File.read(WAV_IN).bytesize)
     end
 
+    pending 'verify the data somehow'
     pending 'it preserves optional data chunks'
   end
+
 
   describe '#update_data' do
     SLICE_LENGTH = 4
@@ -77,6 +83,7 @@ describe Zappa::Wave do
     end
   end
 
+
   describe '#==' do
     it 'is equal to a wave with identical data' do
     end
@@ -89,6 +96,7 @@ describe Zappa::Wave do
 
     pending 'is equal to a wave with different opt chunks'
   end
+
 
   describe '#parse_file' do
     it 'returns the object, if it is a file' do

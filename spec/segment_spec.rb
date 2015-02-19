@@ -37,12 +37,12 @@ describe Zappa::Segment do
   end
 
   describe '#persist' do
-    before do
+    before :each do
       subject.from_file(WAV_IN)
-      subject.cache = nil
     end
 
     it 'creates new cache, if none exists' do
+      subject.cache = nil
       subject.persist
       expect(subject.cache.nil?).to eq(false)
       w = Zappa::Wave.new
