@@ -59,6 +59,21 @@ describe Zappa::Segment do
     end
   end
 
+  describe '#slice_samples' do
+    before :each do
+      subject.from_file(WAV_IN)
+      subject.slice_samples(0, 4)
+    end
+
+    it 'modifies the wav' do
+      expect(subject.wav.data_size).to eq(16)
+    end
+
+    it 'invalidates the cache' do
+      expect(subject.cache).to eq(nil)
+    end
+  end
+
   describe '#export' do
     before do
       @tmp = Tempfile.new('zappa-spec')

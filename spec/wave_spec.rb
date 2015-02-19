@@ -99,4 +99,27 @@ describe Zappa::Wave do
       expect(subject.parse_file(WAV_IN)).to eq(WAV_IN)
     end
   end
+
+
+  describe '#slice_samples' do
+    it 'fails if the beginning is larger than the end' do
+      expect { subject.slice_samples(5,2) }.to raise_error(RuntimeError)
+    end
+
+    it 'fails if the beginning is negative' do
+      expect { subject.slice_samples(-1,2) }.to raise_error(RuntimeError)
+    end
+
+    it 'fails if the end is larger than the total size' do
+      expect { subject.slice_samples(WAV_IN_DATA_SIZE,WAV_IN_DATA_SIZE+1) }
+        .to raise_error(RuntimeError)
+    end
+
+    it 'returns the sample slice as a string' do
+      slice = @wav.slice_samples(0,4)
+      expect(slice.bytesize).to eq(16)
+    end
+
+    pending 'verify the data somehow'
+  end
 end

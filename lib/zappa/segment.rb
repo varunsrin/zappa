@@ -16,26 +16,18 @@ module Zappa
       @wav.unpack(@cache)
     end
 
-    def from_wav(wav)
-      @wav = wav
-      persist
+    def slice_samples(from, to)
+      slice = @wav.slice_samples(from, to)
+      @wav.update_data(slice)
+      @cache = nil
     end
 
     def export(path)
-      persist
+      persist if @cache.nil?
       cmd = 'ffmpeg -i ' + @cache + ' -y -f wav ' + path
       Open3.popen3(cmd) do |_stdin, _stdout, _stderr, wait_thr|
         fail 'Cannot export to' + path unless wait_thr.value.success?
       end
-    end
-
-    def spawn(data)
-      binding.pry
-      new_wav = deep_copy(@wav)
-      new_wav.update_data(data)
-      seg = Segment.new
-      s.wav = new_wav
-      seg
     end
 
     def persist

@@ -63,5 +63,21 @@ module Zappa
       return file.path if file.class == File
       fail 'cannot unpack type: ' + file.class.to_s
     end
+
+    def slice_samples(from, to)
+      fail 'invalid index' if from < 0 || to > sample_count
+      fail 'negative range' if from >= to
+      data.byteslice(from*frame_size, to*frame_size)
+    end
+
+    private
+
+    def sample_count
+      data_size / frame_size
+    end
+
+    def frame_size
+      @format.bits_per_sample * @format.channels / 8
+    end
   end
 end
