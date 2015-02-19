@@ -16,6 +16,10 @@ module Zappa
       @wav.unpack(@cache)
     end
 
+    def slice(from, to)
+      slice_samples(ms_to_samples(from), ms_to_samples(to))
+    end
+
     def slice_samples(from, to)
       slice = @wav.slice_samples(from, to)
       @wav.update_data(slice)
@@ -39,6 +43,10 @@ module Zappa
     end
 
     private
+
+    def ms_to_samples(ms)
+      (ms * @wav.format.sample_rate / 1000).round
+    end
 
     def safe_copy(path)
       tmp = Tempfile.new('zappa')
