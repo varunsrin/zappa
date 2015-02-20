@@ -7,8 +7,8 @@
 
 0.2 - Slicing
 -------------
-- Slice segments into smaller parts (by time or samples)
-- Join segments
+- Slice clips into smaller parts (by time or samples)
+- Join clips
 
 
 0.3 - DSP - Basic

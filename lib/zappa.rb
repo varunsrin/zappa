@@ -1,4 +1,4 @@
 require 'zappa/version'
-require 'zappa/segment'
+require 'zappa/clip'
 require 'zappa/wave'
 require 'zappa/errors'

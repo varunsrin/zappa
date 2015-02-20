@@ -7,6 +7,7 @@ RSpec.configure do |config|
   # config
 end
 
-def wav_data(encoded_wav)
-  encoded_wav.split('dataPu').last
+def slice_and_unpack(item, offset, size, enc)
+  item = item.byteslice(offset, size)
+  item = item.unpack(enc) if enc
 end

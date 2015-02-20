@@ -1,103 +1,74 @@
-# http://soundfile.sapp.org/doc/WaveFormat/
+require 'zappa/wave/format'
+require 'zappa/wave/riff_header'
+require 'zappa/wave/sub_chunk'
+
+# WAV Spec: http://soundfile.sapp.org/doc/WaveFormat/
 
 module Zappa
   class Wave
-    attr_accessor :format, :data, :data_size, :file_path
-    SUBCHUNKS = %q('fmt', 'data')
-    KNOWN_FMT_SIZE = 16
+    attr_accessor :header, :format
 
-    def initialize(path)
-      @header = {}
-      @format = {}
-      @data = {}
-
-      begin
-        @file = File.new(path, 'rb')
-      rescue
-        raise FileError.new('Could not find ' + path)
-      else
-        @file_path = @file.path
-        unpack_wav
-      end
+    def initialize
+      @header = RiffHeader.new
+      @format = Format.new
+      @wave_data = SubChunk.new
     end
 
-    def update
-      raw_file = pack_riff_header + pack_fmt + pack_data
-      File.write(@file_path, raw_file)
+    def data
+      @wave_data.data
     end
 
-    def pack_riff_header
-      hdr = ''
-      hdr += @header[:chunk_id]
-      hdr += [@header[:chunk_size]].pack('V')
-      hdr += @header[:format]
+    def data_size
+      @wave_data.chunk_size
     end
 
-    def pack_fmt
-      fmt = 'fmt '
-      fmt += [16].pack('V')
-      fmt += [@format[:audio_format]].pack('v')
-      fmt += [@format[:channels]].pack('v')
-      fmt += [@format[:sample_rate]].pack('V')
-      fmt += [@format[:byte_rate]].pack('V')
-      fmt += [@format[:block_align]].pack('v')
-      fmt += [@format[:bits_per_sample]].pack('v')
+    def frame_size
+      @format.bits_per_sample * @format.channels / 8
     end
 
-    def pack_data
-      data = 'data'
-      data += [@data[:size]].pack('V')
-      data += @data[:data]
-    end
-
-    def unpack_wav
-      unpack_riff_header
-      while @data[:data].nil?
-        unpack_subchunk
-      end
-    end
-
-    def unpack_riff_header
-      @header[:chunk_id] = @file.read(4)
-      @header[:chunk_size] = @file.read(4).unpack('V').first
-      @header[:format] = @file.read(4)
-      raise FileFormatError.new('Format is not WAVE') unless @header[:format] == 'WAVE'
-      raise FileFormatError.new('ID is not RIFF') unless @header[:chunk_id] == 'RIFF'
-    end
-
-    def unpack_subchunk
-      id = @file.read(4).strip
-      if SUBCHUNKS.include?(id)
-        send('unpack_' + id)
-      else
-        unpack_unknown
-      end
-    end
-
-    def unpack_fmt
-      size                      = @file.read(4).unpack('V').first
-      @format[:audio_format]    = @file.read(2).unpack('v').first
-      @format[:channels]        = @file.read(2).unpack('v').first
-      @format[:sample_rate]     = @file.read(4).unpack('V').first
-      @format[:byte_rate]       = @file.read(4).unpack('V').first
-      @format[:block_align]     = @file.read(2).unpack('v').first
-      @format[:bits_per_sample] = @file.read(2).unpack('v').first
-      unread = size - KNOWN_FMT_SIZE
-      @format[:unknown] = @file.read(unread) if unread > 0
-    end
-
-    def unpack_data
-      @data[:size]  = @file.read(4).unpack('V').first
-      @data[:data]  = @file.read(@data[:size])
-    end
-
-    def unpack_unknown
-      size = @file.read(4).unpack('V').first
-      @file.read(size)
+    def sample_count
+      data_size / frame_size
     end
 
     def ==(other)
-      other.format == format && other.data == data
+      other.data == data
+    end
+
+    def update_data(new_data)
+      @wave_data.chunk_id = 'data'
+      new_size = new_data.bytesize
+      @header.chunk_size += (new_size - @wave_data.chunk_size) 
+      @wave_data.chunk_size = new_size
+      @wave_data.data = new_data
+    end
+
+    def pack
+      pack = @header.pack + @format.pack + @wave_data.pack
+    end
+
+    def unpack(source)
+      begin
+        file = File.open(path_to(source), 'rb')
+      rescue
+        fail 'Unable to open WAV file'
+      else
+        data_found = false
+        @header = RiffHeader.new(file)
+        @format = Format.new(file)
+        while !data_found
+          s = SubChunk.new(file)
+          if s.chunk_id == 'data'
+            @wave_data = s
+            data_found = true
+          end
+        end
+      end
+    end
+
+    def path_to(source)
+      return source if source.class == String
+      return source.path if source.class == File
+      fail 'cannot unpack type: ' + source.class.to_s
     end
   end
 end
