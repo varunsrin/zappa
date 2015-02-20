@@ -1,7 +1,6 @@
 module Zappa
   class SubChunk
-    attr_reader :chunk_id
-    attr_accessor :chunk_size, :data
+    attr_accessor :chunk_id, :chunk_size, :data
 
     def initialize(file = nil)
       if file.nil?

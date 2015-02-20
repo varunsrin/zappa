@@ -22,6 +22,10 @@ module Zappa
       end
     end
 
+    def ==(other)
+      pack == other.pack
+    end
+
     def pack
       fmt = @chunk_id
       fmt += [@chunk_size].pack('V')

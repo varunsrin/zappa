@@ -35,6 +35,7 @@ module Zappa
     end
 
     def update_data(new_data)
+      @wave_data.chunk_id = 'data'
       new_size = new_data.bytesize
       @header.chunk_size += (new_size - @wave_data.chunk_size) 
       @wave_data.chunk_size = new_size

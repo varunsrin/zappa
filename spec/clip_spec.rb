@@ -59,7 +59,7 @@ describe Zappa::Clip do
 
   describe '#slice_samples' do
     before :each do
-      @slice = subject.slice_samples(0, 4)
+      @slice = subject.slice_samples(4, 8)
     end
 
     it 'fails if the beginning is larger than the end' do

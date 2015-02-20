@@ -37,7 +37,8 @@ module Zappa
       fail 'negative range' if from >= to
       from *= @wav.frame_size
       to *= @wav.frame_size
-      slice = @wav.data.byteslice(from, to)
+      length = (to - from)
+      slice = @wav.data.byteslice(from, length)
       clone(slice)
     end
 

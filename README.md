@@ -25,8 +25,10 @@ Or install it yourself as:
 At the core of Zappa is the Clip, an immutable audio unit. Import a wav file
 into a clip:
 
-    include 'zappa'
-    clip = Clip.from_file('this_is_a_song.wav')
+    require 'zappa'
+        
+    clip = Zappa::Clip.new
+    clip.from_file('this_is_a_song.wav')
 
 The clip will create a safe copy of the wav before you can edit it. Remember,
 clips are immutable so any destructive operations return a new clip.
@@ -43,7 +45,6 @@ You can also join clips:
 Once you're done editing a clip, you can export it:
 
     joined_clip.export('output.wav')
-
 
 That's it for now. DSP tools are coming soon!
 
