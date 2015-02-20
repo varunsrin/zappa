@@ -21,7 +21,6 @@ describe Zappa::Wave do
     @wav.unpack(@file)
   end
 
-
   describe '#initialize' do
     it 'has a default header, format chunks and empty wave chunk' do
       w = Zappa::Wave.new
@@ -69,16 +68,23 @@ describe Zappa::Wave do
   end
 
   describe '#==' do
+    before :each do
+      @new_wave = Marshal.load(Marshal.dump(@wav))
+    end
+
     it 'is equal to a wave with identical data' do
+      expect(@wav).to eq(@new_wave)
     end
 
     it 'is equal to a wave with different fmt data' do
+      @new_wave.format.bits_per_sample = 2
+      expect(@wav).to eq(@new_wave)
     end
 
     it 'is not equal to a wave with different data' do
-    end 
-
-    pending 'is equal to a wave with different opt chunks'
+      @new_wave.update_data('')
+      expect(@wav).not_to eq(@new_wave)
+    end
   end
 
   describe '#path_to' do
