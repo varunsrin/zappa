@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Varun Srinivasan']
   spec.email         = ['varunsrin@gmail.com']
   spec.summary       = 'Ruby gem for manipulating audio files.'
-  spec.description   = 'TODO: Write a longer description. Optional.'
+  spec.description   = 'Zappa is a DSP toolbox for manipulating audio files.'
   spec.homepage      = ''
   spec.license       = 'MIT'
 
