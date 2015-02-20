@@ -40,8 +40,6 @@ module Zappa
       @byte_rate       = data.byteslice(8..11).unpack('V').first
       @block_align     = data.byteslice(12..13).unpack('v').first
       @bits_per_sample = data.byteslice(14..15).unpack('v').first
-      unknown_size     = @chunk_size - FMT_SIZE
-      @unknown      = data.byteslice(16..(15 + unknown_size)) if unknown_size > 0
     end
   end
 end
