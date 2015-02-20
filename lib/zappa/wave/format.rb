@@ -34,14 +34,14 @@ module Zappa
     end
 
     def unpack(data)
-      @audio_format    = data.byteslice(0,2).unpack('v').first
-      @channels        = data.byteslice(2,4).unpack('v').first
-      @sample_rate     = data.byteslice(4,8).unpack('V').first
-      @byte_rate       = data.byteslice(8,12).unpack('V').first
-      @block_align     = data.byteslice(12,14).unpack('v').first
-      @bits_per_sample = data.byteslice(14,16).unpack('v').first
+      @audio_format    = data.byteslice(0..1).unpack('v').first
+      @channels        = data.byteslice(2..3).unpack('v').first
+      @sample_rate     = data.byteslice(4..7).unpack('V').first
+      @byte_rate       = data.byteslice(8..11).unpack('V').first
+      @block_align     = data.byteslice(12..13).unpack('v').first
+      @bits_per_sample = data.byteslice(14..15).unpack('v').first
       unknown_size     = @chunk_size - FMT_SIZE
-      @unknown      = data.byteslice(16, 16 + unknown_size) if unknown_size > 0
+      @unknown      = data.byteslice(16..(15 + unknown_size)) if unknown_size > 0
     end
   end
 end

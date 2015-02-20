@@ -2,19 +2,14 @@ require 'spec_helper'
 require 'tempfile'
 
 WAV_IN  = 'spec/audio/basic-5s.wav'
+WAV_IN_DATA_SIZE = 882000
 
 describe Zappa::Segment do
-  describe '#initialize' do
-    it 'does not have a cache value' do
-      expect(subject.cache.nil?).to eq(true)
-    end
+  before :each do
+    subject.from_file(WAV_IN)
   end
 
   describe '#from_file' do
-    before do
-      subject.from_file(WAV_IN)
-    end
-
     it 'makes a safe wav copy of the file' do
       orig_file = File.open(WAV_IN, 'rb')
       orig_wav = Zappa::Wave.new
@@ -36,34 +31,34 @@ describe Zappa::Segment do
     pending 'raises error if ffmpeg is not installed'
   end
 
-
-  describe '#persist' do
-    before :each do
-      subject.from_file(WAV_IN)
-    end
-
-    it 'creates new cache, if none exists' do
+  describe '#export' do
+    before do
+      @tmp = Tempfile.new('zappa-spec')
       subject.cache = nil
-      subject.persist
+      subject.export(@tmp.path)
+    end
+
+    it 'persisted the file' do
       expect(subject.cache.nil?).to eq(false)
-      w = Zappa::Wave.new
-      w.unpack(subject.cache)
-      expect(subject.wav).to eq(w)
+      # expect the data of cache matches data in object
     end
 
-    it 'overwrites cache, if it exists' do
-      subject.wav.format.sample_rate = 44101
-      subject.persist
-      w = Zappa::Wave.new
-      w.unpack(subject.cache)
-      expect(w.format.sample_rate).to eq(44101)
+    it 'exports the segment correctly' do
+      subject.from_file(WAV_IN)
+      export_wav = Zappa::Wave.new
+      export_wav.unpack(File.open(@tmp.path, 'rb'))
+      expect(subject.wav).to eq(export_wav)
     end
+
+    it 'raises error for invalid path' do
+      expect { subject.export('some:foo') }.to raise_error(RuntimeError)
+    end
+
+    pending 'raises error if ffmpeg is not installed'
   end
-
 
   describe '#slice_samples' do
     before :each do
-      subject.from_file(WAV_IN)
       subject.slice_samples(0, 4)
     end
 
@@ -74,17 +69,33 @@ describe Zappa::Segment do
     it 'invalidates the cache' do
       expect(subject.cache).to eq(nil)
     end
+
+    it 'fails if the beginning is larger than the end' do
+      expect { subject.slice_samples(5,2) }.to raise_error(RuntimeError)
+    end
+
+    it 'fails if the beginning is negative' do
+      expect { subject.slice_samples(-1,2) }.to raise_error(RuntimeError)
+    end
+
+    it 'fails if the end is larger than the total size' do
+      expect { subject.slice_samples(WAV_IN_DATA_SIZE,WAV_IN_DATA_SIZE+1) }
+        .to raise_error(RuntimeError)
+    end
+
+    pending 'verify the data somehow'
   end
 
 
   describe '#slice' do
     before :each do
-      subject.from_file(WAV_IN)
       subject.slice(0, 4)
     end
 
     it 'slices the wav by ms range' do
-      expect(subject.wav.data_size).to eq(704)
+      samples_in_ms = (4 * 44.1).round
+      total_bytes = samples_in_ms * 4
+      expect(subject.wav.data_size).to eq(total_bytes)
     end
 
     it 'invalidates the cache' do
@@ -92,31 +103,16 @@ describe Zappa::Segment do
     end
   end
 
-
-  describe '#export' do
-    before do
-      @tmp = Tempfile.new('zappa-spec')
-      subject.from_file(WAV_IN)
-      subject.cache = nil
-      subject.export(@tmp.path)
+  describe '#+' do
+    it 'combines the audio segments' do
+      combined = subject + subject
+      expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
     end
 
-    it 'persisted the file' do
-      expect(subject.cache.nil?).to eq(false)
+    it 'fails if the wave formats are different' do
+      sub_copy =  Marshal.load(Marshal.dump(subject))
+      sub_copy.wav.format.sample_rate = 22000
+      expect { subject + sub_copy }.to raise_error(RuntimeError)
     end
-
-    it 'exports the segment correctly' do
-      orig_wav = Zappa::Wave.new
-      orig_wav.unpack(File.open(WAV_IN, 'rb')) 
-      export_wav = Zappa::Wave.new
-      export_wav.unpack(File.open(@tmp.path, 'rb'))
-      expect(orig_wav).to eq(export_wav)
-    end
-
-    it 'raises error for invalid path' do
-      expect { subject.export('some:foo') }.to raise_error(RuntimeError)
-    end
-
-    pending 'raises error if ffmpeg is not installed'
   end
 end
