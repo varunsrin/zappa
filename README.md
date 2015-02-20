@@ -22,24 +22,30 @@ Or install it yourself as:
 
 ## Usage
 
-You can open a wave file:
+At the core of Zappa is the Clip, an immutable audio unit. Import a wav file
+into a clip:
 
-```
-include 'zappa'
-s = Segment.from_file('this_is_a_song.wav')
-```
+    include 'zappa'
+    clip = Clip.from_file('this_is_a_song.wav')
 
-and then read any of its properties:
+The clip will create a safe copy of the wav before you can edit it. Remember,
+clips are immutable so any destructive operations return a new clip.
 
-```
-puts s.format
-```
+You can slice clips into smaller chunks:
 
-and save it to a different location:
+    slice_a = clip.slice(0, 1000)    # clip containing 1st second
+    slice_b = clip.slice(1000, 2000) # clip containing 3rd second
 
-```
-s.export('output.wav')
-```
+You can also join clips:
+
+    joined_clip = slice_a + slice_b  # clip containing 1st and 3rd seconds
+
+Once you're done editing a clip, you can export it:
+
+    joined_clip.export('output.wav')
+
+
+That's it for now. DSP tools are coming soon!
 
 
 ## Contributing

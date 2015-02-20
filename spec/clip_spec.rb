@@ -4,7 +4,7 @@ require 'tempfile'
 WAV_IN  = 'spec/audio/basic-5s.wav'
 WAV_IN_DATA_SIZE = 882000
 
-describe Zappa::Segment do
+describe Zappa::Clip do
   before :each do
     subject.from_file(WAV_IN)
   end
@@ -24,8 +24,8 @@ describe Zappa::Segment do
     end
 
     it 'raises error if file does not exist' do
-      s = Zappa::Segment.new
-      expect { s.from_file('some_foo') }.to raise_error(RuntimeError)
+      c = Zappa::Clip.new
+      expect { c.from_file('some_foo') }.to raise_error(RuntimeError)
     end
 
     pending 'raises error if ffmpeg is not installed'
@@ -43,7 +43,7 @@ describe Zappa::Segment do
       # expect the data of cache matches data in object
     end
 
-    it 'exports the segment correctly' do
+    it 'exports the clip correctly' do
       subject.from_file(WAV_IN)
       export_wav = Zappa::Wave.new
       export_wav.unpack(File.open(@tmp.path, 'rb'))
@@ -59,15 +59,7 @@ describe Zappa::Segment do
 
   describe '#slice_samples' do
     before :each do
-      subject.slice_samples(0, 4)
-    end
-
-    it 'slices the wave by sample range' do
-      expect(subject.wav.data_size).to eq(16)
-    end
-
-    it 'invalidates the cache' do
-      expect(subject.cache).to eq(nil)
+      @slice = subject.slice_samples(0, 4)
     end
 
     it 'fails if the beginning is larger than the end' do
@@ -83,28 +75,33 @@ describe Zappa::Segment do
         .to raise_error(RuntimeError)
     end
 
-    pending 'verify the data somehow'
-  end
+    it 'slices the wave by sample range' do
+      expect(@slice.wav.data_size).to eq(16)
+    end
 
+    it 'invalidates the cache' do
+      expect(@slice.cache).to eq(nil)
+    end
+  end
 
   describe '#slice' do
     before :each do
-      subject.slice(0, 4)
+      @slice = subject.slice(0, 4)
     end
 
     it 'slices the wav by ms range' do
       samples_in_ms = (4 * 44.1).round
       total_bytes = samples_in_ms * 4
-      expect(subject.wav.data_size).to eq(total_bytes)
+      expect(@slice.wav.data_size).to eq(total_bytes)
     end
 
     it 'invalidates the cache' do
-      expect(subject.cache).to eq(nil)
+      expect(@slice.cache).to eq(nil)
     end
   end
 
   describe '#+' do
-    it 'combines the audio segments' do
+    it 'combines the audio clips' do
       combined = subject + subject
       expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
     end

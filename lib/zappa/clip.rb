@@ -3,7 +3,7 @@ require 'open3'
 require 'pry'
 
 module Zappa
-  class Segment
+  class Clip
     attr_accessor :wav, :cache
 
     def initialize(wav=nil)
@@ -38,8 +38,7 @@ module Zappa
       from *= @wav.frame_size
       to *= @wav.frame_size
       slice = @wav.data.byteslice(from, to)
-      @wav.update_data(slice)
-      clear_cache
+      clone(slice)
     end
 
     def +(other)
@@ -47,7 +46,7 @@ module Zappa
       w = Wave.new()
       w.format = @wav.format
       w.update_data(@wav.data + other.wav.data)
-      Segment.new(w)
+      Clip.new(w)
     end
 
     private
@@ -70,9 +69,11 @@ module Zappa
       destination
     end
 
-    def clear_cache
-      @cache = nil
-      # deletes backing file from tmp
+    def clone(data = nil)
+      clone = Clip.new
+      clone.wav = Marshal.load(Marshal.dump(@wav))
+      clone.wav.update_data(data) if data
+      clone
     end
   end
 end

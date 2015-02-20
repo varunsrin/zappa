@@ -6,7 +6,7 @@ module Zappa
     def initialize(file = nil)
       if file.nil?
         @chunk_id = 'RIFF'
-        @chunk_size = 40 # TODO - make this dynamic at the Wave class
+        @chunk_size = 40
         @format = 'WAVE'
       else
         unpack(file)
