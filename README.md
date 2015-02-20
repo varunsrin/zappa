@@ -1,4 +1,6 @@
 # Zappa
+[![Circle CI](https://circleci.com/gh/varunsrin/zappa/tree/master.svg?style=svg)](https://circleci.com/gh/varunsrin/zappa/tree/master)
+[![Coverage Status](https://coveralls.io/repos/varunsrin/zappa/badge.svg)](https://coveralls.io/r/varunsrin/zappa)
 
 Zappa is a high level audio manipulation library for Ruby, inspired by pydub.
 
