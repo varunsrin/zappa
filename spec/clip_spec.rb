@@ -44,10 +44,9 @@ describe Zappa::Clip do
     end
 
     it 'exports the clip correctly' do
-      subject.from_file(WAV_IN)
       export_wav = Zappa::Wave.new
       export_wav.unpack(File.open(@tmp.path, 'rb'))
-      expect(subject.wav).to eq(export_wav)
+      expect(subject.wav == export_wav).to eq(true)
     end
 
     it 'raises error for invalid path' do
@@ -59,19 +58,15 @@ describe Zappa::Clip do
 
   describe '#slice_samples' do
     before :each do
-      @slice = subject.slice_samples(4, 8)
-    end
-
-    it 'fails if the beginning is larger than the end' do
-      expect { subject.slice_samples(5,2) }.to raise_error(RuntimeError)
+      @slice = subject.slice_samples(4, 4)
     end
 
     it 'fails if the beginning is negative' do
       expect { subject.slice_samples(-1,2) }.to raise_error(RuntimeError)
     end
 
-    it 'fails if the end is larger than the total size' do
-      expect { subject.slice_samples(WAV_IN_DATA_SIZE,WAV_IN_DATA_SIZE+1) }
+    it 'fails if the length exceeds the wave\'s length' do
+      expect { subject.slice_samples(1, WAV_IN_DATA_SIZE) }
         .to raise_error(RuntimeError)
     end
 

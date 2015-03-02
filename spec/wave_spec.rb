@@ -26,44 +26,44 @@ describe Zappa::Wave do
       w = Zappa::Wave.new
       wav_def_hdr.each { |h| expect(h[1]).to eq(w.header.send(h[0])) }
       wav_def_fmt.each { |h| expect(h[1]).to eq(w.format.send(h[0])) }
-      expect(w.data).to eq(nil)
       expect(w.data_size).to eq(0)
+      expect(w.samples).to eq([])
     end
   end
 
-  describe '#update_data' do
-    let (:slice_length) { 4 }
+  describe 'unpacks and packs wave data' do
+    before :each do
+      @packed = @wav.pack
+      @file_data = File.read(wav_path)
+    end
+
+    it 'does not alter the format' do
+      packed_fmt = @packed.byteslice(8, 8)
+      fmt = @file_data.byteslice(8, 8)
+      expect(packed_fmt).to eq(fmt)
+    end
+
+    it 'does not alter the wave data' do
+      packed_data = @packed.byteslice(16, wav_data_size - 16).force_encoding('UTF-8')
+      data = @file_data.byteslice(16, wav_data_size - 16)
+      expect(packed_data).to eq(data)
+    end
+
+  end
+
+  describe '#set_samples' do
+    let (:samples) { [[3,1],[3,1]] }
 
     before :each do
-      @new_data = @wav.data.byteslice(0, slice_length)
-      @wav.update_data(@new_data)
+      @wav.set_samples(samples)
     end
 
-    it 'updates the wav data correctly' do
-      expect(@wav.data).to eq(@new_data)
+    it 'updates the header correctly' do
+      expect(@wav.header.chunk_size).to eq(44)
     end
 
-    it 'updates header data correctly' do
-      expect(@wav.header.chunk_size).to eq(40)
-      expect(@wav.data_size).to eq(slice_length)
-    end
-  end
-
-  describe '#pack' do
-    it 'packs all sub-chunks into a string' do
-      expect(@wav.pack.bytesize).to eq(@file.size)
-    end
-  end
-
-  describe '#unpack' do
-    it 'reads format headers correctly' do
-      wav_def_fmt.each do |h|  
-        expect(h[1]).to eq(@wav.format.send(h[0]))
-      end
-    end
-
-    it 'reads data size correctly' do
-      expect(@wav.data_size).to eq(wav_data_size)
+    it 'updates the wave data correctly' do
+      expect(@wav.samples).to eq(samples)
     end
   end
 
@@ -82,7 +82,7 @@ describe Zappa::Wave do
     end
 
     it 'is not equal to a wave with different data' do
-      @new_wave.update_data('')
+      @new_wave.set_samples([3,1])
       expect(@wav).not_to eq(@new_wave)
     end
   end

@@ -28,17 +28,13 @@ module Zappa
       end
     end
 
-    def slice(from, to)
-      slice_samples(ms_to_samples(from), ms_to_samples(to))
+    def slice(pos, len)
+      slice_samples(ms_to_samples(pos), ms_to_samples(len))
     end
 
-    def slice_samples(from, to)
-      fail 'invalid index' if from < 0 || to > @wav.sample_count
-      fail 'negative range' if from >= to
-      from *= @wav.frame_size
-      to *= @wav.frame_size
-      length = (to - from)
-      slice = @wav.data.byteslice(from, length)
+    def slice_samples(pos, len)
+      fail 'invalid index' if pos < 0 || (pos + len) > @wav.sample_count
+      slice = @wav.samples[pos, len]
       clone(slice)
     end
 
@@ -46,7 +42,7 @@ module Zappa
       fail 'format mismatch' unless @wav.format == other.wav.format 
       w = Wave.new()
       w.format = @wav.format
-      w.update_data(@wav.data + other.wav.data)
+      w.set_samples(@wav.samples + other.wav.samples)
       Clip.new(w)
     end
 
@@ -70,10 +66,10 @@ module Zappa
       destination
     end
 
-    def clone(data = nil)
+    def clone(samples = nil)
       clone = Clip.new
       clone.wav = Marshal.load(Marshal.dump(@wav))
-      clone.wav.update_data(data) if data
+      clone.wav.set_samples(samples) if samples
       clone
     end
   end
