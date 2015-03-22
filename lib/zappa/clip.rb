@@ -41,15 +41,23 @@ module Zappa
     end
 
     def +(other)
-      fail 'format mismatch' unless @wav.format == other.wav.format 
-      w = Wave.new()
-      w.format = @wav.format
-      w.set_samples(@wav.samples + other.wav.samples)
-      Clip.new(w)
+      if other.class == Fixnum
+        return self.amplify(other)
+      end
+
+      if other.class == Zappa::Clip
+        fail 'format mismatch' unless @wav.format == other.wav.format 
+        w = Wave.new()
+        w.format = @wav.format
+        w.set_samples(@wav.samples + other.wav.samples)
+        return Clip.new(w)
+      end
+      
+      fail "cannot add Zappa::Clip to #{other.class}"
     end
 
     def amplify(db)
-      clone(@processor.amplify(db))
+      clone(@processor.amplify(db, @wav.samples))
     end
 
     private

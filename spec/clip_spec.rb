@@ -96,9 +96,14 @@ describe Zappa::Clip do
   end
 
   describe '#+' do
-    it 'combines the audio clips' do
+    it 'combines clips when added to an audio clip' do
       combined = subject + subject
       expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+    end
+
+    it 'amplifies itself when added to an integer' do
+      amplified = subject + 2
+      expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called? 
     end
 
     it 'fails if the wave formats are different' do
