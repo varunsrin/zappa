@@ -11,7 +11,7 @@ module Zappa
         @chunk_size      = FMT_SIZE
         @audio_format    = 1
         @channels        = 2
-        @sample_rate     = 44100
+        @sample_rate     = 44_100
         @byte_rate       = 176_400
         @block_align     = 4
         @bits_per_sample = 16

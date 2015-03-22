@@ -7,7 +7,7 @@ module Zappa
   class Clip
     attr_accessor :wav, :cache
 
-    def initialize(wav=nil)
+    def initialize(wav = nil)
       if wav
         @wav = wav
       else
@@ -42,17 +42,17 @@ module Zappa
 
     def +(other)
       if other.class == Fixnum
-        return self.amplify(other)
+        return amplify(other)
       end
 
       if other.class == Zappa::Clip
-        fail 'format mismatch' unless @wav.format == other.wav.format 
-        w = Wave.new()
+        fail 'format mismatch' unless @wav.format == other.wav.format
+        w = Wave.new
         w.format = @wav.format
         w.set_samples(@wav.samples + other.wav.samples)
         return Clip.new(w)
       end
-      
+
       fail "cannot add Zappa::Clip to #{other.class}"
     end
 
@@ -68,7 +68,7 @@ module Zappa
 
     def persist_cache
       tmp = Tempfile.new('zappa')
-      @cache = tmp.path 
+      @cache = tmp.path
       File.write(@cache, @wav.pack)
     end
 

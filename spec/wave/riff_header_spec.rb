@@ -10,7 +10,7 @@ describe Zappa::RiffHeader do
     file = File.open(wav_path, 'rb')
     subject.unpack(file)
     pck_header = subject.pack
-    
+
     expect(src_header).to eq(pck_header)
   end
 end

@@ -11,7 +11,7 @@ describe Zappa::SubChunkHeader do
 
   it 'unpacks subchunk data correctly' do
     expect(subject.chunk_id).to eq('data')
-    expect(subject.chunk_size).to eq(882000)
+    expect(subject.chunk_size).to eq(882_000)
   end
 
   it 'packs subchunk data into a string' do

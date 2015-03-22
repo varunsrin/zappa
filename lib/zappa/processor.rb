@@ -15,13 +15,15 @@ module Zappa
       frame.map { |s| clip((s * factor).round) }
     end
 
-    def clip(value, max = 32768)
+    def clip(value, max = 32_768)
       return max if value > max
       return -max if value < (-max)
-      return value
+      value
     end
 
     # convert db values to floats
-    def db_to_float(db); 10 ** (db / 20); end
-  end 
+    def db_to_float(db)
+      10**(db / 20)
+    end
+  end
 end

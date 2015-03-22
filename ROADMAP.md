@@ -14,9 +14,6 @@
 0.3 - DSP - Basic
 ----------------
 - Amplify signals by DB
-- Calculate RMS
-- Calculate Max
-- Normalize
 - Phase Invert
 
 
@@ -60,3 +57,4 @@ Release - 1.0 Basic DSP Platform
 - DSP: Compressor
 - DSP: Remove Silence
 - DSP: Limiter
+- DSP: Normalize

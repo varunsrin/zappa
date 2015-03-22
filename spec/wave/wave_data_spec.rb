@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe Zappa::WaveData do
   before :each do
-    @samples = [[7,5], [1,3], [4,4]]
-    @dummy_samples = [[1,2], [3,4]]
+    @samples = [[7, 5], [1, 3], [4, 4]]
+    @dummy_samples = [[1, 2], [3, 4]]
     subject.set_samples(@samples)
   end
 

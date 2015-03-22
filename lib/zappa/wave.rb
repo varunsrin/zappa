@@ -44,20 +44,18 @@ module Zappa
     end
 
     def unpack(source)
-      begin
-        file = File.open(path_to(source), 'rb')
-      rescue
-        fail 'Unable to open WAV file'
-      else
-        @header = RiffHeader.new(file)
-        @format = Format.new(file)
-        while sc_header = file.read(8)
-          s = SubChunkHeader.new(sc_header)
-          if s.chunk_id == 'data'
-            unpack_samples(file)
-          else
-            file.read(s.chunk_size)
-          end
+      file = File.open(path_to(source), 'rb')
+    rescue
+      raise 'Unable to open WAV file'
+    else
+      @header = RiffHeader.new(file)
+      @format = Format.new(file)
+      while sc_header = file.read(8)
+        s = SubChunkHeader.new(sc_header)
+        if s.chunk_id == 'data'
+          unpack_samples(file)
+        else
+          file.read(s.chunk_size)
         end
       end
     end

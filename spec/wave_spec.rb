@@ -4,16 +4,20 @@ require 'tempfile'
 describe Zappa::Wave do
   let(:wav_path) { 'spec/audio/basic-5s.wav' }
   let(:empty_path) { 'does-not-exist.wav' }
-  let(:wav_data_size) { 882000 }
-  let(:wav_def_fmt) { { audio_format: 1,
-                        channels: 2,
-                        sample_rate: 44_100,
-                        byte_rate: 176_400,
-                        block_align: 4,
-                        bits_per_sample: 16 } }
-  let(:wav_def_hdr) { { chunk_id: 'RIFF',
-                        chunk_size: 40,
-                        format: 'WAVE' } }
+  let(:wav_data_size) { 882_000 }
+  let(:wav_def_fmt) do
+    { audio_format: 1,
+      channels: 2,
+      sample_rate: 44_100,
+      byte_rate: 176_400,
+      block_align: 4,
+      bits_per_sample: 16 }
+  end
+  let(:wav_def_hdr) do
+    { chunk_id: 'RIFF',
+      chunk_size: 40,
+      format: 'WAVE' }
+  end
 
   before :each do
     @file = File.open(wav_path, 'rb')
@@ -48,11 +52,10 @@ describe Zappa::Wave do
       data = @file_data.byteslice(16, wav_data_size - 16)
       expect(packed_data).to eq(data)
     end
-
   end
 
   describe '#set_samples' do
-    let (:samples) { [[3,1],[3,1]] }
+    let (:samples) { [[3, 1], [3, 1]] }
 
     before :each do
       @wav.set_samples(samples)
@@ -82,7 +85,7 @@ describe Zappa::Wave do
     end
 
     it 'is not equal to a wave with different data' do
-      @new_wave.set_samples([3,1])
+      @new_wave.set_samples([3, 1])
       expect(@wav).not_to eq(@new_wave)
     end
   end

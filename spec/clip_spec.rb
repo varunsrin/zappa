@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'tempfile'
 
 WAV_IN  = 'spec/audio/basic-5s.wav'
-WAV_IN_DATA_SIZE = 882000
+WAV_IN_DATA_SIZE = 882_000
 
 describe Zappa::Clip do
   before :each do
@@ -62,7 +62,7 @@ describe Zappa::Clip do
     end
 
     it 'fails if the beginning is negative' do
-      expect { subject.slice_samples(-1,2) }.to raise_error(RuntimeError)
+      expect { subject.slice_samples(-1, 2) }.to raise_error(RuntimeError)
     end
 
     it 'fails if the length exceeds the wave\'s length' do
@@ -103,12 +103,12 @@ describe Zappa::Clip do
 
     it 'amplifies itself when added to an integer' do
       amplified = subject + 2
-      expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called? 
+      expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called?
     end
 
     it 'fails if the wave formats are different' do
       sub_copy =  Marshal.load(Marshal.dump(subject))
-      sub_copy.wav.format.sample_rate = 22000
+      sub_copy.wav.format.sample_rate = 22_000
       expect { subject + sub_copy }.to raise_error(RuntimeError)
     end
   end
