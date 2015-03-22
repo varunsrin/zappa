@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'open3'
+require 'zappa/processor'
 require 'pry'
 
 module Zappa
@@ -13,6 +14,7 @@ module Zappa
         @wav = Wave.new
       end
       @cache = nil
+      @processor = Processor.new
     end
 
     def from_file(path)
@@ -44,6 +46,10 @@ module Zappa
       w.format = @wav.format
       w.set_samples(@wav.samples + other.wav.samples)
       Clip.new(w)
+    end
+
+    def amplify(db)
+      clone(@processor.amplify(db))
     end
 
     private
