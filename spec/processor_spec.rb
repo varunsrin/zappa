@@ -10,7 +10,7 @@ describe Zappa::Processor do
     let(:double_factor) { 6.020599913279623 } # double_factor db == 2x linear
     
     before do
-      @amplified = subject.amplify(double_factor, samples)
+      @amplified = subject.amplify(samples, double_factor)
     end
 
     it 'doubles sample values' do
@@ -29,10 +29,28 @@ describe Zappa::Processor do
   describe '#invert' do
     it 'inverts all sample values' do
       inverted = subject.invert(samples)
-      expect(inverted[0][0]).to eq(0)
-      expect(inverted[0][1]).to eq(1)
-      expect(inverted[1][0]).to eq(-24_000)
-      expect(inverted[1][1]).to eq(24_000)
+      expect(inverted).to eq([[0, 1], [-24_000, 24_000]])
+    end
+  end
+
+  describe '#normalize' do
+    it 'normalizes all sample values' do
+      normalized = subject.normalize(samples, -0.1)
+      expect(normalized).to eq([[0, -1], [32_393, -32_393]])
+    end
+  end
+
+  describe '#compressor' do
+    before do
+      @compressed = subject.compress(samples, 4.0, -20.0)
+    end
+
+    it 'does not affect values below the threshold' do
+      expect(@compressed[0]).to eq([0, -1])
+    end
+
+    it 'affects values above the threshold according to the ratio' do
+      expect(@compressed[1]).to eq([18819, -18819])
     end
   end
 end

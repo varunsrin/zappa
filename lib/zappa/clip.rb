@@ -58,8 +58,16 @@ module Zappa
 
     # Processor Wrappers
 
+    def normalize(headroom)
+      clone(@processor.normalize(@wav.samples, headroom))
+    end
+
+    def compress(ratio = 2.0, threshold = - 20.0)
+      clone(@processor.compress(@wav.samples, ratio, threshold))
+    end
+
     def amplify(db)
-      clone(@processor.amplify(db, @wav.samples))
+      clone(@processor.amplify(@wav.samples, db))
     end
 
     def invert

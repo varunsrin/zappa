@@ -96,9 +96,15 @@ describe Zappa::Clip do
   end
 
   describe '#+' do
-    it 'combines clips when added to an audio clip' do
+    it 'adds two audio clips together' do
       combined = subject + subject
       expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+    end
+
+    it 'adds empty clips to clip with audio' do
+      new_clip = Clip.new
+      combined = subject + new_clip
+      expect(combined.wav).to be(WAV_IN_DATA_SIZE)
     end
 
     it 'amplifies itself when added to an integer' do
