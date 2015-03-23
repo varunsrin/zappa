@@ -16,6 +16,22 @@ module Zappa
       mul_samples(samples, -1)
     end
 
+    # simple RC FIR
+    def high_pass_filter(samples, cutoff)
+      rc = 1.0 / (cutoff * 2 * Math::PI)
+      dt = 1.0 / 2
+      alpha = rc / (rc + dt)
+      
+      filt_samples = samples
+      for i in 1..1
+        for ch in 0..1
+          filt_samples[i][ch] = (alpha * (filt_samples[i-1][ch] + samples[i][ch] - samples[i-1][ch])).round
+        end
+      end
+      filt_samples
+      binding.pry
+    end
+
     def compress(samples, ratio, threshold)
       threshold_value = 32_768 * db_to_float(threshold) # calc this somehow
       samples.each do |f|

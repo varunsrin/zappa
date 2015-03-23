@@ -53,4 +53,13 @@ describe Zappa::Processor do
       expect(@compressed[1]).to eq([18819, -18819])
     end
   end
+
+  describe '#high_pass_filter' do
+    before do
+      @filtered = subject.high_pass_filter(samples, 10_000)
+    end
+
+    it 'filters the samples' do
+    end
+  end
 end
