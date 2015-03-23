@@ -56,8 +56,14 @@ module Zappa
       fail "cannot add Zappa::Clip to #{other.class}"
     end
 
+    # Processor Wrappers
+
     def amplify(db)
       clone(@processor.amplify(db, @wav.samples))
+    end
+
+    def invert
+      clone(@processor.invert(@wav.samples))
     end
 
     private

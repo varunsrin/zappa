@@ -5,6 +5,10 @@ module Zappa
       mul_samples(samples, db_to_float(db))
     end
 
+    def invert(samples)
+      mul_samples(samples, -1)
+    end
+
     private
 
     def mul_samples(samples, factor)
@@ -22,8 +26,6 @@ module Zappa
     end
 
     # convert db values to floats
-    def db_to_float(db)
-      10**(db / 20)
-    end
+    def db_to_float(db); 10**(db / 20); end
   end
 end
