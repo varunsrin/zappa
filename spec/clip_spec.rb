@@ -96,26 +96,30 @@ describe Zappa::Clip do
   end
 
   describe '#+' do
-    it 'adds two audio clips together' do
-      combined = subject + subject
-      expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+    context 'concatenation' do
+      it 'adds two audio clips together' do
+        combined = subject + subject
+        expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+      end
+
+      it 'adds audio clip to empty clip' do
+        new_clip = Zappa::Clip.new
+        combined = subject + new_clip
+        expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE)
+      end
+
+      it 'fails if the wave formats are different' do
+        sub_copy =  Marshal.load(Marshal.dump(subject))
+        sub_copy.wav.format.sample_rate = 22_000
+        expect { subject + sub_copy }.to raise_error(RuntimeError)
+      end
     end
 
-    it 'adds empty clips to clip with audio' do
-      new_clip = Clip.new
-      combined = subject + new_clip
-      expect(combined.wav).to be(WAV_IN_DATA_SIZE)
-    end
-
-    it 'amplifies itself when added to an integer' do
-      amplified = subject + 2
-      expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called?
-    end
-
-    it 'fails if the wave formats are different' do
-      sub_copy =  Marshal.load(Marshal.dump(subject))
-      sub_copy.wav.format.sample_rate = 22_000
-      expect { subject + sub_copy }.to raise_error(RuntimeError)
+    context 'amplification' do 
+      it 'amplifies clip when added to integer' do
+        amplified = subject + 2
+        expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called?
+      end
     end
   end
 end

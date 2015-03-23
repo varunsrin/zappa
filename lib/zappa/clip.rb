@@ -49,7 +49,10 @@ module Zappa
         fail 'format mismatch' unless @wav.format == other.wav.format
         w = Wave.new
         w.format = @wav.format
-        w.set_samples(@wav.samples + other.wav.samples)
+        samples = [] 
+        samples += @wav.samples if @wav.samples
+        samples += other.wav.samples if other.wav.samples
+        w.set_samples(samples)
         return Clip.new(w)
       end
 
