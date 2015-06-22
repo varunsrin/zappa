@@ -9,16 +9,22 @@ module Zappa
       @max_amplitude = ((2 ** bit_depth) / 2) - 1 
     end
 
-    def sine(frequency, length)
+    def generate(type, frequency, length)
+      types = %w(sine square sawtooth white_noise)
+      raise "Cannot generate #{type} wave" unless types.include?(type)
+
+      samples = []
       wave_pos = 0.0
       wave_delta = frequency.to_f / @sample_rate.to_f
       num_samples = (length * @sample_rate).round
-      samples = []
+
       num_samples.times do  |i|
-        value = (sine_at(wave_pos) * @max_amplitude).round
-        samples[i] = [value] * @channels
+        wave_value = send(type, wave_pos)
+        abs_value = (wave_value * @max_amplitude).round
+        samples[i] = [abs_value] * @channels
         wave_pos += wave_delta
         wave_pos -= 1.0 if wave_pos >= 1.0
+        #TODO - account for skips >= 2.0
       end
       clip_from_samples(samples)
     end
@@ -31,6 +37,18 @@ module Zappa
       clip = Zappa::Clip.new(wave)
     end
 
-    def sine_at(position); Math::sin(position * 2 * Math::PI); end
+    def sine(position)
+      Math::sin(position * 2 * Math::PI)
+    end
+
+    def square(position)
+      position < 0.5 ? 1 : -1
+    end
+
+    def sawtooth(position)
+      2 * (position - (0.5 + position).floor)
+    end
+
+    def white_noise(_position); rand(-1.0..1.0); end
   end
 end
