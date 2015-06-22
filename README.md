@@ -36,6 +36,17 @@ Import a wav file into a clip:
 The clip will create a safe copy of the wav before you can edit it. Remember,
 clips are immutable so any destructive operations return a new clip.
 
+
+### Generators
+
+Alternatively, you can generate your own sounds from scratch: 
+
+    generator = Zappa:Generator.new
+    clip = generator.generate('sine', 1000, 1)
+
+This will create a 1000 Hz sine wave that is 1 second long.
+
+
 ### Editing Clips
 
 You can slice clips into smaller chunks:
@@ -54,6 +65,7 @@ Amplify or attenuate clips with the following syntax:
     
     louder_clip = joined_clip + 2
     louder_clip = joined_clip.amplify(2)
+
 
 ### Export
 
