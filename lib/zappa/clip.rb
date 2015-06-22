@@ -1,18 +1,19 @@
 require 'tempfile'
 require 'open3'
-require 'pry'
+require 'zappa/processor'
 
 module Zappa
   class Clip
     attr_accessor :wav, :cache
 
-    def initialize(wav=nil)
+    def initialize(wav = nil)
       if wav
         @wav = wav
       else
         @wav = Wave.new
       end
       @cache = nil
+      @processor = Processor.new
     end
 
     def from_file(path)
@@ -28,26 +29,49 @@ module Zappa
       end
     end
 
-    def slice(from, to)
-      slice_samples(ms_to_samples(from), ms_to_samples(to))
+    def slice(pos, len)
+      slice_samples(ms_to_samples(pos), ms_to_samples(len))
     end
 
-    def slice_samples(from, to)
-      fail 'invalid index' if from < 0 || to > @wav.sample_count
-      fail 'negative range' if from >= to
-      from *= @wav.frame_size
-      to *= @wav.frame_size
-      length = (to - from)
-      slice = @wav.data.byteslice(from, length)
+    def slice_samples(pos, len)
+      fail 'invalid index' if pos < 0 || (pos + len) > @wav.sample_count
+      slice = @wav.samples[pos, len]
       clone(slice)
     end
 
     def +(other)
-      fail 'format mismatch' unless @wav.format == other.wav.format 
-      w = Wave.new()
-      w.format = @wav.format
-      w.update_data(@wav.data + other.wav.data)
-      Clip.new(w)
+      return amplify(other) if other.class == Fixnum
+
+      if other.class == Zappa::Clip
+        fail 'format mismatch' unless @wav.format == other.wav.format
+        w = Wave.new
+        w.format = @wav.format
+        samples = []
+        samples += @wav.samples if @wav.samples
+        samples += other.wav.samples if other.wav.samples
+        w.set_samples(samples)
+        return Clip.new(w)
+      end
+
+      fail "cannot add Zappa::Clip to #{other.class}"
+    end
+
+    # Processor Wrappers
+
+    def normalize(headroom)
+      clone(@processor.normalize(@wav.samples, headroom))
+    end
+
+    def compress(ratio = 2.0, threshold = - 20.0)
+      clone(@processor.compress(@wav.samples, ratio, threshold))
+    end
+
+    def amplify(db)
+      clone(@processor.amplify(@wav.samples, db))
+    end
+
+    def invert
+      clone(@processor.invert(@wav.samples))
     end
 
     private
@@ -58,7 +82,7 @@ module Zappa
 
     def persist_cache
       tmp = Tempfile.new('zappa')
-      @cache = tmp.path 
+      @cache = tmp.path
       File.write(@cache, @wav.pack)
     end
 
@@ -70,10 +94,10 @@ module Zappa
       destination
     end
 
-    def clone(data = nil)
+    def clone(samples = nil)
       clone = Clip.new
       clone.wav = Marshal.load(Marshal.dump(@wav))
-      clone.wav.update_data(data) if data
+      clone.wav.set_samples(samples) if samples
       clone
     end
   end

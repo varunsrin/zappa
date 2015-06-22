@@ -1,9 +1,12 @@
 require 'bundler/setup'
 Bundler.setup
 
+require 'coveralls'
+Coveralls.wear!
+
 require 'zappa'
 
-RSpec.configure do |config|
+RSpec.configure do |_config|
   # config
 end
 

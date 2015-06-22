@@ -2,10 +2,10 @@ require 'spec_helper'
 require 'tempfile'
 
 WAV_IN  = 'spec/audio/basic-5s.wav'
-WAV_IN_DATA_SIZE = 882000
+WAV_IN_DATA_SIZE = 882_000
 
 describe Zappa::Clip do
-  before :each do
+  before do
     subject.from_file(WAV_IN)
   end
 
@@ -44,10 +44,9 @@ describe Zappa::Clip do
     end
 
     it 'exports the clip correctly' do
-      subject.from_file(WAV_IN)
       export_wav = Zappa::Wave.new
       export_wav.unpack(File.open(@tmp.path, 'rb'))
-      expect(subject.wav).to eq(export_wav)
+      expect(subject.wav == export_wav).to eq(true)
     end
 
     it 'raises error for invalid path' do
@@ -59,19 +58,15 @@ describe Zappa::Clip do
 
   describe '#slice_samples' do
     before :each do
-      @slice = subject.slice_samples(4, 8)
-    end
-
-    it 'fails if the beginning is larger than the end' do
-      expect { subject.slice_samples(5,2) }.to raise_error(RuntimeError)
+      @slice = subject.slice_samples(4, 4)
     end
 
     it 'fails if the beginning is negative' do
-      expect { subject.slice_samples(-1,2) }.to raise_error(RuntimeError)
+      expect { subject.slice_samples(-1, 2) }.to raise_error(RuntimeError)
     end
 
-    it 'fails if the end is larger than the total size' do
-      expect { subject.slice_samples(WAV_IN_DATA_SIZE,WAV_IN_DATA_SIZE+1) }
+    it 'fails if the length exceeds the wave\'s length' do
+      expect { subject.slice_samples(1, WAV_IN_DATA_SIZE) }
         .to raise_error(RuntimeError)
     end
 
@@ -101,15 +96,35 @@ describe Zappa::Clip do
   end
 
   describe '#+' do
-    it 'combines the audio clips' do
-      combined = subject + subject
-      expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+    context 'concatenation' do
+      it 'adds two audio clips together' do
+        combined_clip = subject + subject
+        expect(combined_clip.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+      end
+
+      it 'adds audio clip to empty clip' do
+        new_clip = Zappa::Clip.new
+        combined_clip = subject + new_clip
+        expect(combined_clip.wav.data_size).to be(WAV_IN_DATA_SIZE)
+      end
+
+      it 'fails if the wave formats are different' do
+        subject_copy =  Marshal.load(Marshal.dump(subject))
+        subject_copy.wav.format.sample_rate = 22_000
+        expect { subject + subject_copy }.to raise_error(RuntimeError)
+      end
+
+      it 'fails if added to a non-wave object' do
+        non_wave = Object.new
+        expect { subject + non_wave }.to raise_error(RuntimeError)
+      end
     end
 
-    it 'fails if the wave formats are different' do
-      sub_copy =  Marshal.load(Marshal.dump(subject))
-      sub_copy.wav.format.sample_rate = 22000
-      expect { subject + sub_copy }.to raise_error(RuntimeError)
+    context 'amplification' do
+      it 'amplifies clip when added to integer' do
+        expect(subject).to receive(:amplify).with(2)
+        subject + 2
+      end
     end
   end
 end
