@@ -5,7 +5,7 @@ WAV_IN  = 'spec/audio/basic-5s.wav'
 WAV_IN_DATA_SIZE = 882_000
 
 describe Zappa::Clip do
-  before :each do
+  before do
     subject.from_file(WAV_IN)
   end
 
@@ -98,27 +98,32 @@ describe Zappa::Clip do
   describe '#+' do
     context 'concatenation' do
       it 'adds two audio clips together' do
-        combined = subject + subject
-        expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
+        combined_clip = subject + subject
+        expect(combined_clip.wav.data_size).to be(WAV_IN_DATA_SIZE * 2)
       end
 
       it 'adds audio clip to empty clip' do
         new_clip = Zappa::Clip.new
-        combined = subject + new_clip
-        expect(combined.wav.data_size).to be(WAV_IN_DATA_SIZE)
+        combined_clip = subject + new_clip
+        expect(combined_clip.wav.data_size).to be(WAV_IN_DATA_SIZE)
       end
 
       it 'fails if the wave formats are different' do
-        sub_copy =  Marshal.load(Marshal.dump(subject))
-        sub_copy.wav.format.sample_rate = 22_000
-        expect { subject + sub_copy }.to raise_error(RuntimeError)
+        subject_copy =  Marshal.load(Marshal.dump(subject))
+        subject_copy.wav.format.sample_rate = 22_000
+        expect { subject + subject_copy }.to raise_error(RuntimeError)
+      end
+
+      it 'fails if added to a non-wave object' do
+        non_wave = Object.new
+        expect { subject + non_wave }.to raise_error(RuntimeError)
       end
     end
 
     context 'amplification' do
       it 'amplifies clip when added to integer' do
-        amplified = subject + 2
-        expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called?
+        expect(subject).to receive(:amplify).with(2)
+        subject + 2
       end
     end
   end
