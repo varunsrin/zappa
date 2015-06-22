@@ -1,7 +1,6 @@
 require 'tempfile'
 require 'open3'
 require 'zappa/processor'
-require 'pry'
 
 module Zappa
   class Clip
@@ -41,15 +40,13 @@ module Zappa
     end
 
     def +(other)
-      if other.class == Fixnum
-        return amplify(other)
-      end
+      return amplify(other) if other.class == Fixnum
 
       if other.class == Zappa::Clip
         fail 'format mismatch' unless @wav.format == other.wav.format
         w = Wave.new
         w.format = @wav.format
-        samples = [] 
+        samples = []
         samples += @wav.samples if @wav.samples
         samples += other.wav.samples if other.wav.samples
         w.set_samples(samples)

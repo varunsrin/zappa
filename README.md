@@ -41,7 +41,7 @@ clips are immutable so any destructive operations return a new clip.
 
 Alternatively, you can generate your own sounds from scratch: 
 
-    generator = Zappa:Generator.new
+    generator = Zappa::Generator.new
     clip = generator.generate('sine', 1000, 1)
 
 This will create a 1000 Hz sine wave that is 1 second long.

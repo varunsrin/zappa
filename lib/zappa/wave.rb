@@ -37,7 +37,7 @@ module Zappa
 
     def pack
       pack = @header.pack + @format.pack
-      pack  += @wave_data.chunk_id
+      pack += @wave_data.chunk_id
       pack += [@wave_data.chunk_size].pack('V')
       pack += pack_samples(@wave_data.samples)
       pack

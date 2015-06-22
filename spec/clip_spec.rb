@@ -115,7 +115,7 @@ describe Zappa::Clip do
       end
     end
 
-    context 'amplification' do 
+    context 'amplification' do
       it 'amplifies clip when added to integer' do
         amplified = subject + 2
         expect(amplified.wav).to eq(subject.amplify(2).wav) # maybe just expect the method to be called?

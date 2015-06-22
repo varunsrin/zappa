@@ -55,6 +55,8 @@ module Zappa
     end
 
     # convert db values to floats
-    def db_to_float(db); 10**(db / 20); end
+    def db_to_float(db)
+      10**(db / 20)
+    end
   end
 end

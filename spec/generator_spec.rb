@@ -19,10 +19,9 @@ describe Zappa::Generator do
       expect(orig_wav).to eq(gen_clip.wav)
     end
 
-    # generated sawtooth, square waves have slightly diff values 
+    # generated sawtooth, square waves have slightly diff values
     # from audacity generated waves. why?
     pending 'generates a 1000 Hz sawtooth wave'
     pending 'generates a 1000 Hz square wave'
   end
 end
-

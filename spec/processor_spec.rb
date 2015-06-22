@@ -8,7 +8,7 @@ describe Zappa::Processor do
 
   describe '#amplify' do
     let(:double_factor) { 6.020599913279623 } # double_factor db == 2x linear
-    
+
     before do
       @amplified = subject.amplify(samples, double_factor)
     end
@@ -50,7 +50,7 @@ describe Zappa::Processor do
     end
 
     it 'affects values above the threshold according to the ratio' do
-      expect(@compressed[1]).to eq([18819, -18819])
+      expect(@compressed[1]).to eq([18_819, -18_819])
     end
   end
 end
