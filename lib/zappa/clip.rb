@@ -56,7 +56,7 @@ module Zappa
       fail "cannot add Zappa::Clip to #{other.class}"
     end
 
-    # Processor Wrappers
+    # Processor Interfaces
 
     def normalize(headroom)
       clone(@processor.normalize(@wav.samples, headroom))
@@ -72,6 +72,14 @@ module Zappa
 
     def invert
       clone(@processor.invert(@wav.samples))
+    end
+
+    def filter(type, cutoff)
+      filter_types = %w(high_pass low_pass)
+      fail "Unknown filter type: #{type}" unless filter_types.include?(type)
+      samples = @processor.send("#{type}_filter", @wav.samples,
+                                cutoff, @wav.format.sample_rate)
+      clone(samples)
     end
 
     private
