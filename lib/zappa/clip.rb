@@ -1,6 +1,6 @@
 require 'tempfile'
 require 'open3'
-require_relative 'processor'
+require 'zappa/processor'
 
 module Zappa
   class Clip
