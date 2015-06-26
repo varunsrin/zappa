@@ -56,7 +56,7 @@ module Zappa
       fail "cannot add Zappa::Clip to #{other.class}"
     end
 
-    # Processor Wrappers
+    # Processor Interfaces
 
     def normalize(headroom)
       clone(@processor.normalize(@wav.samples, headroom))
@@ -72,6 +72,42 @@ module Zappa
 
     def invert
       clone(@processor.invert(@wav.samples))
+    end
+
+    def filter(type, cutoff)
+      filter_types = %w(high_pass low_pass)
+      fail "Unknown filter type: #{type}" unless filter_types.include?(type)
+      samples = @processor.send("#{type}_filter", @wav.samples,
+                                cutoff, @wav.format.sample_rate)
+      clone(samples)
+    end
+
+    # TODO: - Make utilities generic in a module, and call them specifically here.
+
+    def rms(values)
+      # this should be a util
+      return 0 if values.size == 0
+      fail 'rms only accepts arrays' unless values.class == Array
+      values_sq = values.flatten.map { |s| s**2 }
+      Math.sqrt(values_sq.inject(:+).to_f / values_sq.length)
+    end
+
+    def max_possible_amplitude
+      # this should be a property of wave or clip
+      (2**@wav.format.bits_per_sample) / 2
+    end
+
+    def dbfs
+      # this should be a property of wave or clip
+      # Sample bit depth gives us the total range
+      # Divide by two to get the maximum positive or negative value
+      max_poss_amplitude = (2**@wav.format.bits_per_sample) / 2.0
+      ratio_to_db(rms(@wav.samples) / max_poss_amplitude)
+    end
+
+    def ratio_to_db(ratio)
+      # this should be a util
+      20 * Math.log10(ratio)
     end
 
     private
