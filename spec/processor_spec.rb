@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Zappa::Processor do
   let(:subject) { Zappa::Processor.new }
+  let(:generator) { Zappa::Generator.new }
   let(:samples) { [[0, -1], [24_000, -24_000]] }
   let(:max_val) { 32_768 }
   let(:min_val) { -32_768 }
@@ -37,6 +38,34 @@ describe Zappa::Processor do
     it 'normalizes all sample values' do
       normalized = subject.normalize(samples, -0.1)
       expect(normalized).to eq([[0, -1], [32_393, -32_393]])
+    end
+  end
+
+  describe '#high_pass_filter' do
+    it 'noticeably reduces loudness if less than 3 octaves apart' do
+      wave = generator.generate('sine', 400, 1)
+      filtered_dbfs = wave.filter('high_pass', 800).dbfs
+      expect(wave.dbfs.round).to be > filtered_dbfs.round
+    end
+
+    it 'does not noticeably reduce loudness if > 3 octaves away' do
+      wave = generator.generate('sine', 800, 1)
+      filtered_dbfs = wave.filter('high_pass', 100).dbfs
+      expect(wave.dbfs.round).to eq(filtered_dbfs.round)
+    end
+  end
+
+  describe '#low_pass_filter' do
+    it 'noticeably reduces loudness if < 3 octaves apart' do
+      wave = generator.generate('sine', 400, 1)
+      filtered_dbfs = wave.filter('low_pass', 800).dbfs
+      expect(wave.dbfs.round).to be > filtered_dbfs.round
+    end
+
+    it 'does not noticeably reduce loudness if > 3 octaves away' do
+      wave = generator.generate('sine', 100, 1)
+      filtered_dbfs = wave.filter('low_pass', 800).dbfs
+      expect(wave.dbfs.round).to eq(filtered_dbfs.round)
     end
   end
 

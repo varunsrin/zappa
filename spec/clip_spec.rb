@@ -127,4 +127,39 @@ describe Zappa::Clip do
       end
     end
   end
+
+  describe 'rms' do
+    it 'calculates rms for empty arrays' do
+      empty = []
+      expect(subject.rms(empty)).to eq(0)
+    end
+
+    it 'calculates rms for empty arrays' do
+      incorrect = 'foo'
+      expect { subject.rms(incorrect) }.to raise_error(RuntimeError)
+    end
+
+    it 'calculates rms for arrays' do
+      nested = [1, 2, 1, -2]
+      rms = Math.sqrt(2.5)
+      expect(subject.rms(nested)).to eq(rms)
+    end
+
+    it 'calculates rms for nested arrays' do
+      nested = [[1, 2], [[1], [-2]]]
+      rms = Math.sqrt(2.5)
+      expect(subject.rms(nested)).to eq(rms)
+    end
+  end
+
+  describe 'dbfs' do
+    it 'calculates dbfs for an empty clip' do
+      clip = Zappa::Clip.new
+      expect(clip.dbfs).to eq(-Float::INFINITY)
+    end
+
+    it 'calculates dbfs for a clip' do
+      expect(subject.dbfs).to eq(-9.715923062450328)
+    end
+  end
 end
